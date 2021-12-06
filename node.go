@@ -198,24 +198,11 @@ func (node Node) doLogicOpWithArgs(args ...interface{}) (ret bool, err error) {
 	return
 }
 
-func (node Node) isPlaceholder(s interface{}) (bool, int, error) {
-	if arg, ok := s.(string); ok {
-		if strings.HasPrefix(arg, placeholderSymbol) {
-			pos, err := strconv.Atoi(arg[placeholderSymbolLen:])
-			if err != nil {
-				return true, pos, err
-			}
-			return true, pos, nil
-		}
-	}
-	return false, 0, nil
-}
-
 // exprt with args
 func (node Node) exprWithArgs(args ...interface{}) (interface{}, error) {
 	if node.OpType == OpTypeNull {
 		if len(args) > 0 {
-			placehoder, pos, err := node.isPlaceholder(node.Value)
+			placehoder, pos, err := isPlaceholder(node.Value)
 			if err == nil {
 				if placehoder {
 					if len(args) < pos {
@@ -259,4 +246,17 @@ func NewPlaceholder(pos int) string {
 func SetDefaultPlaceholderSymbol(s string) {
 	placeholderSymbol = s
 	placeholderSymbolLen = len(s)
+}
+
+func isPlaceholder(s interface{}) (bool, int, error) {
+	if arg, ok := s.(string); ok {
+		if strings.HasPrefix(arg, placeholderSymbol) {
+			pos, err := strconv.Atoi(arg[placeholderSymbolLen:])
+			if err != nil {
+				return true, pos, err
+			}
+			return true, pos, nil
+		}
+	}
+	return false, 0, nil
 }
